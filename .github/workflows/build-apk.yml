@@ -17,9 +17,16 @@ jobs:
           distribution: temurin
           java-version: '17'
       - name: Install Android SDK components
+        shell: bash
         run: |
-          yes | sdkmanager --licenses || true
-          sdkmanager "platforms;android-35" "build-tools;35.0.0"
+          set -e
+          SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager | head -n 1)"
+          if [ -z "$SDKMANAGER" ]; then
+            echo 'Android sdkmanager was not found on the runner'
+            exit 1
+          fi
+          "$SDKMANAGER" --licenses < /dev/null || true
+          "$SDKMANAGER" "platforms;android-35" "build-tools;35.0.0"
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
